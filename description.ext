@@ -1,0 +1,40 @@
+class CfgFunctions
+{
+	class cofD
+	{
+		class core
+		{
+			file = "functions";
+			class firingDrill {};
+			class firingDrillCP {};
+			class pipCam {};
+			class targetDummy {};
+			class terminateDrill {};
+		};
+	};
+};
+
+class CfgCommunicationMenu
+{
+	class startDrill
+	{
+		text = "Start the Drill";		// Text displayed in the menu and in a notification
+		submenu = "";					// Submenu opened upon activation (expression is ignored when submenu is not empty.)
+		expression = "'startDrill.sqf' remoteExec ['execVM', 2, false];";	// Code executed upon activation
+		icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\call_ca.paa";				// Icon displayed permanently next to the command menu
+		cursor = "";				// Custom cursor displayed when the item is selected
+		enable = "1";					// Simple expression condition for enabling the item
+		removeAfterExpressionCall = 0;	// 1 to remove the item after calling
+	};
+
+	class stopDrill
+	{
+		text = "Stop the Drill";
+		submenu = "";  // will open submenu that is defined as global variable MENU_COMMS_1
+		expression = " [ [], cofD_fnc_terminateDrill] remoteExec ['spawn', 2, false];";
+		icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\call_ca.paa";
+		cursor = "";
+		enable = "1";
+		removeAfterExpressionCall = 0;
+	};
+};
