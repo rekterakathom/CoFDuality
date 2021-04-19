@@ -1,19 +1,30 @@
-//Start the firing drill systems.
-//TODO: Hashmaps! Arma 3 v 2.01 required!
-//Instead of assigning variables to the targets, make a hashmap to represent targets?
+/*
+Author: ThomasAngel
+Steam: https://steamcommunity.com/id/Thomasangel/
+Github: https://github.com/rekterakathom
+
+Description:
+Handles the firing drill.
+
+Parameters:
+	NONE.
+
+Usage: [] spawn cofd_fnc_firingDrill;
+
+Returns: Nothing.
+*/
 
 //Serverside script!
 if (!isServer) exitWith {};
 
 //If this function is already active, don't run it again!
-if (drillscript_active isEqualTo true) exitWith {};
+if (drillscript_active) exitWith {};
 
 //Define variables.
-private _1stFloorTargets = [target_1a, target_1b, target_2a, target_2b, target_3a, target_3b, target_3a_1, target_3b_1, target_3c_1, target_3d_1, target_4a, target_4b, target_5a, target_5b, target_5c, target_5d];
+private _targets = [target_1a, target_1b, target_2a, target_2b, target_3a, target_3b, target_3a_1, target_3b_1, target_3c_1, target_3d_1, target_4a, target_4b, target_5a, target_5b, target_5c, target_5d, target_5e, target_6a, target_6b, target_6c, target_7a, target_7b, target_7c, target_7d, target_7e, target_7f, target_8a, target_8b, target_8c, target_8d, target_8e, target_9a, target_9b, target_9c, target_9d, target_9e, target_9f, target_9g, target_9h];
 private _1stFloorBonus = [target_3c, bonus_1, bonus_2, bonus_3, bonus_4, bonus_5, bonus_6, bonus_7, bonus_8, bonus_9, bonus_10];
 private _timer = 0;
-private _bonus = []; //This variable is for special bonus targets, e.g bonus targets that aren't human targets.
-nopop = true;
+private _bonus = []; //This array is for special bonus targets, e.g bonus targets that aren't human targets.
 
 //Reset variables in case they were used before.
 comp_1_ready = false;
@@ -31,17 +42,20 @@ drillscript_active = true;
 
 //Reset targets.
 {
-	_x animate ["terc",1];
+	_x animateSource ["terc",1];
 	_x setVariable ["targetStatus","down",true];
 	_x removeAllEventHandlers "Hit";
-} forEach _1stFloorTargets;
+} forEach _targets;
+
+p1ready setObjectTextureGlobal [1, "images\notready_co.paa"];
+p2ready setObjectTextureGlobal [1, "images\notready_co.paa"];
 
 //Add the actions to the laptops so the players can start the drill.
-[p1ready, ["Competitor 1 ready", { comp_1_ready = true; publicVariable "comp_1_ready"; comp_1_player = _this select 1; publicVariableServer "comp_1_player"}, nil, 1.5, true, true, "", "comp_1_ready isEqualTo false", 5]] remoteExec ["addAction", 0, false];
-[p1ready, ["Competitor 1 not ready", { comp_1_ready = false; publicVariable "comp_1_ready"; comp_1_player = nil; publicVariableServer "comp_1_player"}, nil, 1.5, true, true, "", "comp_1_ready isEqualTo true", 5]] remoteExec ["addAction", 0, false];
+[p1ready, ["Competitor 1 ready", { comp_1_ready = true; publicVariable "comp_1_ready"; comp_1_player = _this select 1; publicVariableServer "comp_1_player"; p1ready setObjectTextureGlobal [1, "images\ready_co.paa"] }, nil, 1.5, true, true, "", "!comp_1_ready", 5]] remoteExec ["addAction", 0, false];
+[p1ready, ["Competitor 1 not ready", { comp_1_ready = false; publicVariable "comp_1_ready"; comp_1_player = nil; publicVariableServer "comp_1_player"; p1ready setObjectTextureGlobal [1, "images\notready_co.paa"] }, nil, 1.5, true, true, "", "comp_1_ready", 5]] remoteExec ["addAction", 0, false];
 
-[p2ready, ["Competitor 2 ready", { comp_2_ready = true; publicVariable "comp_2_ready"; comp_2_player = _this select 1; publicVariableServer "comp_2_player"}, nil, 1.5, true, true, "", "comp_2_ready isEqualTo false", 5]] remoteExec ["addAction", 0, false];
-[p2ready, ["Competitor 2 not ready", { comp_2_ready = false; publicVariable "comp_2_ready"; comp_2_player = nil; publicVariableServer "comp_2_player"}, nil, 1.5, true, true, "", "comp_2_ready isEqualTo true", 5]] remoteExec ["addAction", 0, false];
+[p2ready, ["Competitor 2 ready", { comp_2_ready = true; publicVariable "comp_2_ready"; comp_2_player = _this select 1; publicVariableServer "comp_2_player"; p2ready setObjectTextureGlobal [1, "images\ready_co.paa"] }, nil, 1.5, true, true, "", "!comp_2_ready", 5]] remoteExec ["addAction", 0, false];
+[p2ready, ["Competitor 2 not ready", { comp_2_ready = false; publicVariable "comp_2_ready"; comp_2_player = nil; publicVariableServer "comp_2_player"; p2ready setObjectTextureGlobal [1, "images\notready_co.paa"] }, nil, 1.5, true, true, "", "comp_2_ready", 5]] remoteExec ["addAction", 0, false];
 
 //Wait until both players are ready.
 waitUntil {comp_1_ready isEqualTo true && comp_2_ready isEqualTo true};
@@ -57,41 +71,43 @@ p2ready remoteExec ["removeAllActions", 0, false];
 [parseText "<t size='1.5'>The drill is starting!</t>"] remoteExec ["hintSilent", 0, false];
 
 sleep 3;
-	"FD_Timer_F" remoteExec ["playSound", 0, false];
-	[parseText "<t size='1.5'>3</t>"] remoteExec ["hintSilent", 0, false];
+	"FD_Timer_F" remoteExec ["playSound", [comp_1_player, comp_2_player], false];
+	[parseText "<t size='1.5'>3</t>"] remoteExec ["hintSilent", [comp_1_player, comp_2_player], false];
 sleep 1;
-	"FD_Timer_F" remoteExec ["playSound", 0, false];
-	[parseText "<t size='1.5'>2</t>"] remoteExec ["hintSilent", 0, false];
+	"FD_Timer_F" remoteExec ["playSound", [comp_1_player, comp_2_player], false];
+	[parseText "<t size='1.5'>2</t>"] remoteExec ["hintSilent", [comp_1_player, comp_2_player], false];
 sleep 1;
-	"FD_Timer_F" remoteExec ["playSound", 0, false];
-	[parseText "<t size='1.5'>1</t>"] remoteExec ["hintSilent", 0, false];
+	"FD_Timer_F" remoteExec ["playSound", [comp_1_player, comp_2_player], false];
+	[parseText "<t size='1.5'>1</t>"] remoteExec ["hintSilent", [comp_1_player, comp_2_player], false];
 sleep 1;
 //Check for false start.
-if (comp_1_player distance cp_1 < 9 or comp_2_player distance cp_1 < 9) exitWith { "False start!" remoteExec ["hintSilent", 0, false]; "FD_CP_Not_Clear_F" remoteExec ["playSound", 0, false] };
-	"FD_Start_F" remoteExec ["playSound", 0, false];
-	[parseText "<t size='1.5'>Go!</t>"] remoteExec ["hintSilent", 0, false];
+if (comp_1_player distance [21964.3,21018.2,3.199] < 9 or comp_2_player distance [21964.3,21018.2,3.199] < 9) exitWith { "False start!" remoteExec ["hintSilent", [comp_1_player, comp_2_player], false]; "FD_CP_Not_Clear_F" remoteExec ["playSound", [comp_1_player, comp_2_player], false] };
+	"FD_Start_F" remoteExec ["playSound", [comp_1_player, comp_2_player], false];
+	[parseText "<t size='1.5'>Go!</t>"] remoteExec ["hintSilent", [comp_1_player, comp_2_player], false];
 //Start timer.
 _timer = time;
+missionNameSpace setVariable ["BIS_stopTimer", false];
+[] remoteExec ["BIS_fnc_VRTimer", [comp_1_player, comp_2_player], false];
 
 //First CP.
-waitUntil {comp_1_player distance cp_1 < 2 or comp_2_player distance cp_1 < 2};
-[ [target_1a, target_1b], 2, true, [] ] call cofd_fnc_firingDrillCP;
+waitUntil {comp_1_player distance [21964.3,21018.2,3.199] < 2 or comp_2_player distance [21964.3,21018.2,3.199] < 2};
+[ [target_1a, target_1b], 2, true, [] ] remoteExec ["cofd_fnc_firingDrillCP", [comp_1_player, comp_2_player], false];
 
 //Second CP.
-waitUntil {comp_1_player distance cp_2 < 2 or comp_2_player distance cp_2 < 2};
-[ [target_2a, target_2b], 2.2, true, [] ] call cofd_fnc_firingDrillCP;
+waitUntil {comp_1_player distance [21955.1,21029.1,5.68234] < 2 or comp_2_player distance [21955.1,21029.1,5.68234] < 2};
+[ [target_2a, target_2b], 2.2, true, [] ] remoteExec ["cofd_fnc_firingDrillCP", [comp_1_player, comp_2_player], false];
 
 //Third CP.
-waitUntil {comp_1_player distance cp_3 < 2 or comp_2_player distance cp_3 < 2};
-[ [target_3a, target_3b], 1.3, true, [target_3c] ] call cofd_fnc_firingDrillCP;
+waitUntil {comp_1_player distance [21951.4,21023.7,5.5866] < 2 or comp_2_player distance [21951.4,21023.7,5.5866] < 2};
+[ [target_3a, target_3b], 1.3, true, [target_3c] ] remoteExec ["cofd_fnc_firingDrillCP", [comp_1_player, comp_2_player], false];
 
 //Fourth CP.
-waitUntil {comp_1_player distance cp_4 < 2 or comp_2_player distance cp_4 < 2};
-[ [target_3a_1, target_3b_1, target_3c_1, target_3d_1], 2.5, true, [] ] call cofd_fnc_firingDrillCP;
+waitUntil {comp_1_player distance [21947.4,21029.3,5.26434] < 2 or comp_2_player distance [21947.4,21029.3,5.26434] < 2};
+[ [target_3a_1, target_3b_1, target_3c_1, target_3d_1], 2.5, true, [] ] remoteExec ["cofd_fnc_firingDrillCP", [comp_1_player, comp_2_player], false];
 
 //Fifth CP.
-waitUntil {comp_1_player distance cp_5 < 1.5 or comp_2_player distance cp_5 < 1.5};
-[ [target_4a, target_4b], 1.2, false, [] ] call cofd_fnc_firingDrillCP;
+waitUntil {comp_1_player distance [21949.5,21039.2,2.59443] < 1.5 or comp_2_player distance [21949.5,21039.2,2.59443] < 1.5};
+[ [target_4a, target_4b], 2, false, [] ] remoteExec ["cofd_fnc_firingDrillCP", [comp_1_player, comp_2_player], false];
 
 //Spawn the bonus target room now, before the players can see it.
 _bonusTargets_1 = [bonus_1, bonus_2, bonus_3, bonus_4, bonus_5, bonus_6, bonus_7, bonus_8, bonus_9, bonus_10];
@@ -105,41 +121,70 @@ _bonusTargets_1 = [bonus_1, bonus_2, bonus_3, bonus_4, bonus_5, bonus_6, bonus_7
 } forEach _bonusTargets_1;
 
 //Sixth CP.
-waitUntil {comp_1_player distance cp_6 < 1.5 or comp_2_player distance cp_6 < 1.5};
-[ [target_5a, target_5b, target_5c, target_5d, target_5e], 4, false, [] ] call cofd_fnc_firingDrillCP;
+waitUntil {comp_1_player distance [21944.7,21034.9,3.23064] < 1.5 or comp_2_player distance [21944.7,21034.9,3.23064] < 1.5};
+[ [target_5a, target_5b, target_5c, target_5d, target_5e], 4, false, [] ] remoteExec ["cofd_fnc_firingDrillCP", [comp_1_player, comp_2_player], false];
 
-waitUntil {comp_1_player distance cp_7 < 1 or comp_2_player distance cp_7 < 1};
+//Seventh CP.
+waitUntil {comp_1_player distance [21943.6,21050.2,0.62571] < 2 or comp_2_player distance [21943.6,21050.2,0.62571] < 2};
+[ [target_6a, target_6b, target_6c], 3, true, [] ] remoteExec ["cofd_fnc_firingDrillCP", [comp_1_player, comp_2_player], false];
+
+//Eighth CP.
+waitUntil {comp_1_player distance [21951.3,21043.2,6.122] < 2 or comp_2_player distance [21951.3,21043.2,6.122] < 2};
+[ [target_7a, target_7b, target_7c, target_7d, target_7e, target_7f], 6, true, [] ] remoteExec ["cofd_fnc_firingDrillCP", [comp_1_player, comp_2_player], false];
+
+//Ninth CP.
+waitUntil {comp_1_player distance [21949,21030.4,9.67916] < 2 or comp_2_player distance [21949,21030.4,9.67916] < 2};
+[ [target_8a, target_8b, target_8c, target_8d, target_8e], 8, false, [] ] remoteExec ["cofd_fnc_firingDrillCP", [comp_1_player, comp_2_player], false];
+
+//Tenth CP.
+waitUntil {comp_1_player distance [21959,21039.7,6.78909] < 1 or comp_2_player distance [21959,21039.7,6.78909] < 1};
+[ [target_9a, target_9b, target_9c, target_9d, target_9e, target_9f, target_9g, target_9h], 15, false, [] ] remoteExec ["cofd_fnc_firingDrillCP", [comp_1_player, comp_2_player], false];
+
+//Before the finish line, an epic final target to magdump into for bonus time!
+private _suppGrp = createGroup east;
+private _suppress_1 = _suppGrp createUnit ["O_Soldier_VR_F", [22004.1,21062.7,0], [], 0, "CAN_COLLIDE"];
+_suppress_1 hideObjectGlobal true;
+private _suppress_2 = _suppGrp createUnit ["O_Soldier_VR_F", [22005.9,21061,0], [], 0, "CAN_COLLIDE"];
+_suppress_2 hideObjectGlobal true;
+
+_suppress_1 disableAI "ALL";
+_suppress_2 disableAI "ALL";
+_suppress_1 setSkill 0;
+_suppress_2 setSkill 0;
+magDumpTime = 0;
+_suppress_1 addEventHandler ["suppressed", { if (magDumpTime < 5) then { magDumpTime = magDumpTime + 0.2 } }];
+_suppress_2 addEventHandler ["suppressed", { if (magDumpTime < 5) then { magDumpTime = magDumpTime + 0.2 } }];
+
+//Finish
+waitUntil {comp_1_player distance [21988.3,21044.3,0.719] < 4 or comp_2_player distance [21988.3,21044.3,0.719] < 4};
+_suppress_1 removeAllEventHandlers "suppressed";
+_suppress_2 removeAllEventHandlers "suppressed";
+deleteVehicle _suppress_1;
+deleteVehicle _suppress_2;
+deleteGroup _suppGrp;
+
+//Stop the UI timer.
+missionNameSpace setVariable ["BIS_stopTimer", true];
+missionNameSpace setVariable ["RscFiringDrillTime_done", true];
 
 //Calculate missed and bonus times.
-_missedTime = count (_1stFloorTargets select {_x getVariable "targetStatus" isEqualTo "down"});
+_missedTime = count (_targets select {_x getVariable "targetStatus" isEqualTo "down"});
 _bonusTime = count (_1stFloorBonus select {_x getVariable "targetStatus" isEqualTo "bonus"});
-_specialBonus = 0 - count (_bonus select {!alive _x});
-_bonusTime = _specialBonus - _bonusTime;
-
-//Format text for missed time.
-_missedTotal = format ["<br />Penalty time: %1s", _missedTime];
-
-//Format text for bonus time.
-_bonusTotal = format ["<br />Bonus time: %1s", _bonusTime * -1];
+_specialBonus = -10 + count _bonus;
+_bonusTime = _specialBonus - _bonusTime - magDumpTime;
 
 //Final calculation for the player's time.
-_totalTime = time - _timer - _missedTime + _bonusTime;
-
-//Format texts for the final hint.
-_title = "<t color='#FFFFFF' size='2' shadow='1' shadowColor='#000000' align='center'>Course Cleared!</t>";
-_text = format ["<br /><t color='#FFFFFF' size='1.5' shadow='1' shadowColor='#000000' align='center'>Time: %1</t>", _totalTime];
-
-
-//If one competitor then show only one name, else show two.
-if (comp_1_player isEqualTo comp_2_player) then {
-	_competitors = format ["<br />Competitor: %1", name comp_1_player];
-	hint parseText (_title + _text + _competitors + _bonusTotal + _missedTotal);
-} else {
-	_competitors = format ["<br />Competitors: %1 & %2", name comp_1_player, name comp_2_player];
-	hintSilent parseText (_title + _text + _competitors + _bonusTotal + _missedTotal);
-};
-
-"FD_Finish_F" remoteExec ["playSound", 0, false];
+_totalTime = time - _timer + _missedTime + _bonusTime;
+[_totalTime, _missedTime, _bonusTime] remoteExec ["cofd_fnc_firingDrillEnd", [comp_1_player, comp_2_player], false];
 
 drillScript_active = false;
 	publicVariable "drillScript_active";
+
+//Delete leftover bonus targets.
+{ deleteVehicle _x; } forEach _bonus;
+
+//TODO: implement a better solution to an issue than this.
+sleep 1;
+
+//Reset course.
+[] spawn cofD_fnc_firingDrill;

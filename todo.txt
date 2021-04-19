@@ -1,0 +1,6 @@
+Implement: 
+https://community.bistudio.com/wiki/BIS_fnc_VRTimer
+https://community.bistudio.com/wiki/BIS_fnc_VRHitpart
+
+Optional blacklist for certain weapons?
+NIArms minigun (causes lag)

@@ -1,5 +1,19 @@
+class Params
+{
+	class Zeus_Active
+	{
+		title = "Enable / disable Zeus for Range Officers. Warning: Zeus is unrestricted and it is possible to break the mission with it."; // Param name visible in the list
+		values[] = {0,1}; // Values; must be integers; has to have the same number of elements as 'texts'
+		texts[] = {"Disabled","Enabled"}; // Description of each selectable item
+		default = 0; // Default value; must be listed in 'values' array, otherwise 0 is used
+		// Default values that are not whole numbers do not work. Param will default to 0 (or 1 if defined)
+	};
+};
+
 class CfgFunctions
 {
+	//User input menus.
+	#include "cau\userinputmenus\CfgFunctions.cpp"
 	class cofD
 	{
 		class core
@@ -7,7 +21,10 @@ class CfgFunctions
 			file = "functions";
 			class firingDrill {};
 			class firingDrillCP {};
+			class firingDrillEnd {};
+			class garbageCollect {};
 			class pipCam {};
+			class reflexRange {};
 			class targetDummy {};
 			class terminateDrill {};
 		};
@@ -38,3 +55,9 @@ class CfgCommunicationMenu
 		removeAfterExpressionCall = 0;
 	};
 };
+
+//User input menus.
+#include "cau\userinputmenus\systems\_macros.inc"
+#include "cau\userinputmenus\systems\_defines.inc"
+#include "cau\userinputmenus\controls.cpp"
+#include "cau\userinputmenus\systems\displayListbox.cpp"
