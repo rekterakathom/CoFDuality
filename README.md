@@ -1,3 +1,3 @@
 ![](/picture.jpg)
 
-CoF: Duality is the first truly co-op course of fire in Arma 3.
+![](https://www.bohemia.net/license-icons/small/APL-SA.png)
